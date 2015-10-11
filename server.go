@@ -26,7 +26,7 @@ type Response struct {
 	Body    string       `json:"body"`
 }
 
-func showErr(err error) {
+func showError(err error) {
 	if err != nil {
 		log.Println(err)
 	}
@@ -34,11 +34,12 @@ func showErr(err error) {
 
 // NewResponse creates response instance from http response
 func NewResponse(resp *http.Response) *Response {
-	// defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Println(err)
+	if resp == nil {
+		return nil
 	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	showError(err)
 	return &Response{
 		resp.StatusCode,
 		&resp.Header,
@@ -53,11 +54,11 @@ func batchRequests(requests []*Request, endPoint *url.URL) []*Response {
 	for i, request := range requests {
 		log.Println("Resuest:", request.Method, request.RelativeURL)
 		url, err := endPoint.Parse(request.RelativeURL)
-		showErr(err)
+		showError(err)
 		req, err := http.NewRequest(request.Method, url.String(), strings.NewReader(request.Body))
-		showErr(err)
+		showError(err)
 		resp, err := client.Do(req)
-		showErr(err)
+		showError(err)
 		log.Println(resp)
 		responses[i] = NewResponse(resp)
 	}
@@ -79,8 +80,6 @@ func parseRequest(r *http.Request) (*url.URL, bool, []*Request) {
 	if err != nil {
 		log.Println("JSON unmarshal err:", err)
 	}
-	log.Println(requests[0])
-	log.Println(requests[1])
 	return endPoint, includeHeaders, requests
 }
 
