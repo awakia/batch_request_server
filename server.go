@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/unrolled/render"
 )
@@ -55,7 +56,9 @@ func batchRequests(requests []*Request, endPoint *url.URL) []*Response {
 	for i, request := range requests {
 		wg.Add(1)
 		go func(i int, request *Request) {
-			client := &http.Client{}
+			client := &http.Client{
+				Timeout: 1 * time.Second,
+			}
 			log.Println("Resuest:", request.Method, request.RelativeURL)
 			url, err := endPoint.Parse(request.RelativeURL)
 			showError(err)
