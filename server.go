@@ -91,6 +91,8 @@ func serve() {
 }
 
 func main() {
+	log.SetFlags(log.Lshortfile | log.Ldate | log.Lmicroseconds)
+
 	// endPoint, _ := url.Parse("http://localhost:3000")
 	// requests := []*Request{
 	// 	&Request{
