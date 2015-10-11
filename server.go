@@ -57,7 +57,7 @@ func batchRequests(requests []*Request, endPoint *url.URL) []*Response {
 		wg.Add(1)
 		go func(i int, request *Request) {
 			client := &http.Client{
-				Timeout: 1 * time.Second,
+				Timeout: 10 * time.Second,
 			}
 			log.Println("Resuest:", request.Method, request.RelativeURL)
 			url, err := endPoint.Parse(request.RelativeURL)
