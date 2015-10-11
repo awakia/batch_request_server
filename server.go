@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"sync"
 
 	"github.com/unrolled/render"
 )
@@ -48,20 +49,26 @@ func NewResponse(resp *http.Response) *Response {
 }
 
 func batchRequests(requests []*Request, endPoint *url.URL) []*Response {
-	client := &http.Client{}
 	responses := make([]*Response, len(requests))
+	var wg sync.WaitGroup
 	// TODO: change to use go rutine
 	for i, request := range requests {
-		log.Println("Resuest:", request.Method, request.RelativeURL)
-		url, err := endPoint.Parse(request.RelativeURL)
-		showError(err)
-		req, err := http.NewRequest(request.Method, url.String(), strings.NewReader(request.Body))
-		showError(err)
-		resp, err := client.Do(req)
-		showError(err)
-		log.Println(resp)
-		responses[i] = NewResponse(resp)
+		wg.Add(1)
+		go func(i int, request *Request) {
+			client := &http.Client{}
+			log.Println("Resuest:", request.Method, request.RelativeURL)
+			url, err := endPoint.Parse(request.RelativeURL)
+			showError(err)
+			req, err := http.NewRequest(request.Method, url.String(), strings.NewReader(request.Body))
+			showError(err)
+			resp, err := client.Do(req)
+			showError(err)
+			log.Println(resp)
+			responses[i] = NewResponse(resp)
+			wg.Done()
+		}(i, request)
 	}
+	wg.Wait()
 	return responses
 }
 
