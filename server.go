@@ -26,6 +26,12 @@ type Response struct {
 	Body    string       `json:"body"`
 }
 
+func showErr(err error) {
+	if err != nil {
+		log.Println(err)
+	}
+}
+
 // NewResponse creates response instance from http response
 func NewResponse(resp *http.Response) *Response {
 	// defer resp.Body.Close()
@@ -46,9 +52,13 @@ func batchRequests(requests []*Request, endPoint *url.URL) []*Response {
 	// TODO: change to use go rutine
 	for i, request := range requests {
 		log.Println("Resuest:", request.Method, request.RelativeURL)
-		url, _ := endPoint.Parse(request.RelativeURL)
-		req, _ := http.NewRequest(request.Method, url.String(), strings.NewReader(request.Body))
-		resp, _ := client.Do(req)
+		url, err := endPoint.Parse(request.RelativeURL)
+		showErr(err)
+		req, err := http.NewRequest(request.Method, url.String(), strings.NewReader(request.Body))
+		showErr(err)
+		resp, err := client.Do(req)
+		showErr(err)
+		log.Println(resp)
 		responses[i] = NewResponse(resp)
 	}
 	return responses
