@@ -22,8 +22,8 @@ curl \
     "method":"GET",
     "relative_url":"?ids={result=create-ad:$.data.*.id}"
   }
-]'
-http://loaclhost:8080
+]' \
+http://localhost:8080
 ```
 
 | パラメータ名 | 必須 | 説明 |
